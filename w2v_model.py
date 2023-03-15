@@ -60,9 +60,6 @@ def train(data: str):
 
     # Hidden layer shape = [embeddings_dim, vocabulary size]
     embedding_dims = 150
-    # W1 = Variable(torch.randn(embedding_dims, vocabulary_size), requires_grad=True)
-    # Output layer
-    # W2 = Variable(torch.randn(vocabulary_size, embedding_dims), requires_grad=True)
     EPOCHS = 200
     lr = 0.1
     X = torch.tensor(X)
