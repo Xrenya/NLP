@@ -287,6 +287,15 @@ def tokenize_corpus(corpus):
     return corpus.lower().split()
 
 
+def generate_idx(max_range, batch_size):
+    r = np.arange(max_range)
+    np.random.shuffle(r)
+    output = []
+    for i in range(0, max_range, batch_size):
+        output.append(r[i:i + batch_size])
+    return output
+
+
 def train(data: str):
     """
     return: w2v_dict: dict
@@ -323,29 +332,31 @@ def train(data: str):
     X = np.array(X)
     y = np.array(y)
 
-    embedding_dim = 512
+    embedding_dim = 16
 
     model = Sequential()
     model.add(Embedding(num_embeddings=vocab_size, embedding_dim=embedding_dim))
     model.add(Linear(in_features=embedding_dim, out_feature=vocab_size))
     model.add(LogSoftMax())
-
-    EPOCHS = 4
-    lr = 1
-    momentum = 0.8
+    EPOCHS = 5
+    lr = 0.2
+    momentum = 0.9
+    batch_size = 32
     opt = SGD(model, lr, momentum)
     loss_fn = NLL_Loss()
     for epoch in range(EPOCHS):
-        model.zero_grad_parameters()
+        
+        for idx in generate_idx(len(X), batch_size):
+            model.zero_grad_parameters()
 
-        preds = model.forward(X)
+            preds = model.forward(X[idx])
 
-        loss = loss_fn.forward(preds, y)
-        dloss = loss_fn.backward(preds, y)
+            loss = loss_fn.forward(preds, y[idx])
+            dloss = loss_fn.backward(preds, y[idx])
 
-        model.backward(X, dloss)
+            model.backward(X[idx], dloss)
 
-        opt.step()
+            opt.step()
 
     output = {}
     W = model[0].weight
